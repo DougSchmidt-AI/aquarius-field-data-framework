@@ -24,7 +24,8 @@ namespace PluginTester
             {
                 ConfigureLogging();
 
-                ConfigureJson();
+
+                JsonConfig.Configure();
 
                 var program = new Program();
                 program.ParseArgs(args);
@@ -68,17 +69,6 @@ namespace PluginTester
 
                 return stream.ReadFully();
             }
-        }
-
-        private static void ConfigureJson()
-        {
-            JsConfig.ExcludeTypeInfo = true;
-            JsConfig.DateHandler = DateHandler.ISO8601DateTime;
-            JsConfig.IncludeNullValues = true;
-            JsConfig.IncludeNullValuesInDictionaries = true;
-
-            JsConfig<DateTimeOffset>.SerializeFn = offset => offset.ToString("O");
-            JsConfig<DateTimeOffset?>.SerializeFn = offset => offset?.ToString("O") ?? string.Empty;
         }
 
         private static string GetProgramName()
@@ -171,6 +161,17 @@ namespace PluginTester
             foreach (var path in ExpandDataPath(dataPath))
             {
                 context.DataPaths.Add(path);
+            }
+
+            var jsonText = File.ReadAllText(context.JsonPath);
+
+            var results = jsonText.FromJson<AppendedResults>();
+
+            var jsonText2 = results.ToJson().IndentJson();
+
+            if (jsonText2 != jsonText)
+            {
+                _log.Warn("Oops! There is a JSON serialization difference");
             }
         }
 
