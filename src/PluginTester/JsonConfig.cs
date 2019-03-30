@@ -103,6 +103,11 @@ namespace PluginTester
 
         private static void ConfigureSpecialParsers()
         {
+            // What is a "special parser"?
+            // That is any DTO class which lacks a public parameterless constructor.
+            // These classes need to configure a special deserializer to reconstruct an object from its JSON representation.
+            // These could be avoided if the framework just added "internal" constructors and added [InternalsVisibleTo("ServiceStack.Text")]
+
             Configure(json => new DateTimeInterval(
                 json.Get<DateTimeOffset>(nameof(DateTimeInterval.Start)),
                 json.Get<DateTimeOffset>(nameof(DateTimeInterval.End))));
